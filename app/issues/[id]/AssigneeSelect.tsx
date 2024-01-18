@@ -1,24 +1,16 @@
 "use client";
 
+import { Skeleton } from "@/app/components";
 import { Issue, User } from "@prisma/client";
 import { Select } from "@radix-ui/themes";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import React, { useEffect, useState } from "react";
-import { Skeleton } from "@/app/components";
+import { useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 
 const AssigneeSelect = ({ issue }: { issue: Issue }) => {
-  const {
-    data: users,
-    error,
-    isLoading,
-  } = useQuery<User[]>({
-    queryKey: ["users"],
-    queryFn: () => axios.get("/api/users").then((res) => res.data),
-    staleTime: 60 * 1000,
-    retry: 3,
-  });
+  const { data: users, error, isLoading } = useUsers();
+
   const [assigneeField, setAssigneeField] = useState(
     issue.assignedToUserId || "Unassigned"
   );
@@ -27,21 +19,20 @@ const AssigneeSelect = ({ issue }: { issue: Issue }) => {
 
   if (error) return null;
 
+  const assignIssue = async (userId: string) => {
+    axios
+      .patch(`/api/issues/${issue.id}`, {
+        assignedToUserId: userId === "Unassigned" ? null : userId,
+      })
+      .catch(() => {
+        toast.error("Changes could not be saved!");
+      });
+    setAssigneeField(userId);
+  };
+
   return (
     <>
-      <Select.Root
-        value={assigneeField}
-        onValueChange={async (userId) => {
-          axios
-            .patch(`/api/issues/${issue.id}`, {
-              assignedToUserId: userId === "Unassigned" ? null : userId,
-            })
-            .catch(() => {
-              toast.error("Changes could not be saved!");
-            });
-          setAssigneeField(userId);
-        }}
-      >
+      <Select.Root value={assigneeField} onValueChange={assignIssue}>
         <Select.Trigger placeholder="Assign..." />
         <Select.Content>
           <Select.Group>
@@ -59,5 +50,13 @@ const AssigneeSelect = ({ issue }: { issue: Issue }) => {
     </>
   );
 };
+
+const useUsers = () =>
+  useQuery<User[]>({
+    queryKey: ["users"],
+    queryFn: () => axios.get("/api/users").then((res) => res.data),
+    staleTime: 60 * 1000,
+    retry: 3,
+  });
 
 export default AssigneeSelect;
