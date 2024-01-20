@@ -1,6 +1,6 @@
+import "./globals.css";
 import "@radix-ui/themes/styles.css";
 import "./theme-config.css";
-import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Container, Theme } from "@radix-ui/themes";
@@ -24,15 +24,15 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.variable}>
         <QueryClientProvider>
-        <AuthProvider>
-          {/* <Theme appearance="light" accentColor="jade" radius="large"> */}
-          <Theme accentColor="jade" radius="large">
-            <NavBar />
-            <main className="p-5">
-              <Container>{children}</Container>
-            </main>
-          </Theme>
-        </AuthProvider>
+          <AuthProvider>
+            {/* <Theme appearance="light" accentColor="jade" radius="large"> */}
+            <Theme accentColor="jade" radius="large">
+              <NavBar />
+              <main className="p-5">
+                <Container>{children}</Container>
+              </main>
+            </Theme>
+          </AuthProvider>
         </QueryClientProvider>
       </body>
     </html>
